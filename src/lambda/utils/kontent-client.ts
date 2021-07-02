@@ -69,6 +69,8 @@ class KontentClient {
       collection: item.system.collection,
       type: item.system.type,
       name: item.system.name,
+      question: item.elements.question,
+      answer: item.elements.answer,
       parents: parents,
       contents: ""
     };
@@ -118,6 +120,8 @@ class KontentClient {
         id: item.system.id,
         codename: item.system.codename,
         name: item.system.name,
+        question: item.elements.question,
+        answer: item.elements.answer,
         language: item.system.language,
         type: item.system.type,
         collection: item.system.collection,
