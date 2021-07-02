@@ -67,7 +67,7 @@ class KontentClient {
       codename: item.system.codename,
       language: item.system.language,
       collection: item.system.collection,
-      type: item.system.type,
+      contenttype: item.system.type,
       name: item.system.name,
       question: item.question.value,
       answer: item.answer.value,
@@ -137,7 +137,7 @@ class KontentClient {
         client: item.client.value,        
         source: item.source.value,
         language: item.system.language,
-        content_type: item.system.type,
+        contenttype: item.system.type,
         collection: item.system.collection,
         slug: item[this.config.slugCodename].value,
         content: []
