@@ -19,7 +19,7 @@ class AlgoliaClient {
   async setupIndex() {
     let result = await this.index.setSettings({
       searchableAttributes: ["content.contents", "content.name", "name"],
-      attributesForFaceting: ["content.codename", "language"],
+      attributesForFaceting: ["type", "client"],
       attributesToSnippet: ['content.contents:80']
     }).wait();
   }
