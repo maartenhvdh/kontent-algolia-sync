@@ -32,10 +32,10 @@ class AlgoliaClient {
   }
 
   // returns the indexed content item(s) that include searched content item
-  async searchIndex(searchedType: string, client: string): Promise<SearchableItem[]> {
+  async searchIndex(type: string, client: string): Promise<SearchableItem[]> {
     try {
       const response = await this.index.search<SearchableItem>("", {
-        facetFilters: [`type: ${searchedType}`, `client: ${client}`]
+        facetFilters: [`type: ${type}`, `client: ${client}`]
       });
       return response.hits;
     }
