@@ -71,6 +71,8 @@ class KontentClient {
       name: item.system.name,
       question: item.question.value,
       answer: item.answer.value,
+      type: item.type.value,
+      client: item.client.value,        
       parents: parents,
       contents: ""
     };
@@ -122,6 +124,8 @@ class KontentClient {
         name: item.system.name,
         question: item.question.value,
         answer: item.answer.value,
+        type: item.type.value,
+        client: item.client.value,        
         language: item.system.language,
         contenttype: item.system.type,
         collection: item.system.collection,
