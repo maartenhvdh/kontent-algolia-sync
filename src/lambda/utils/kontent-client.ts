@@ -126,7 +126,7 @@ class KontentClient {
         question: item.question.value,
         answer: item.answer.value,
         lastmodified: item.system.lastModified,
-        type: "test > " + item.type.value,
+        type: item.type.value,
         client: item.client.value,        
         language: item.system.language,
         contenttype: item.system.type,
