@@ -121,7 +121,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   const uniqueItems = Array.from(new Set(itemsToIndex.map(item => item.codename))).map(codename => { return itemsToIndex.find(item => item.codename === codename) });
   const indexedItems: string[] = await algoliaClient.indexSearchableStructure(uniqueItems);
-
+ console.log("end")
   return {
     statusCode: 200,
     body: `${JSON.stringify(indexedItems)}`,
