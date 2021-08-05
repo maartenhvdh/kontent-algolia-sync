@@ -57,6 +57,8 @@ async function processIndexedContent(codename: string, language: string, config:
   const content: ContentItem[] = await kontentClient.getAllContentForCodename(codename);
   const itemFromDelivery = content.find(item => item.system.codename == codename);
 
+  console.log("test maarten");
+
   // nothing found in Kontent => item has been removed
   if (!itemFromDelivery) {
     await algoliaClient.removeFromIndex([codename]);
@@ -65,6 +67,8 @@ async function processIndexedContent(codename: string, language: string, config:
 
   // some content has been found => update existing item by processing it once again
   const searchableStructure = kontentClient.createSearchableStructure([itemFromDelivery], content);
+  
+  console.log(searchableStructure);
   return searchableStructure;
 }
 
@@ -96,7 +100,6 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   const algoliaClient = new AlgoliaClient(config.algolia);
   const itemsToIndex: SearchableItem[] = [];
-  let item = null;
 
   // go through updated items
   for (const affectedItem of webhook.data.items) {
@@ -112,8 +115,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
     // we actually found some items in algolia => update or delete?
     for (const foundItem of foundItems) {
-      item = processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient)
-      itemsToIndex.push(...await item);
+      itemsToIndex.push(...await processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient));
     }
   }
 
@@ -122,7 +124,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   return {
     statusCode: 200,
-    body: `${JSON.stringify(item)}`,
+    body: `${JSON.stringify(indexedItems)}`,
   };
 }
 
