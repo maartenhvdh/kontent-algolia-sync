@@ -116,6 +116,8 @@ export async function handler(event: APIGatewayEvent, context: Context) {
     // we actually found some items in algolia => update or delete?
     for (const foundItem of foundItems) {
       itemsToIndex.push(...await processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient));
+      console.log(foundItem.codename)
+      console.log(processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient))
     }
   }
 
