@@ -100,11 +100,11 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   const algoliaClient = new AlgoliaClient(config.algolia);
   const itemsToIndex: SearchableItem[] = [];
-
+  console.log("begin")
   // go through updated items
   for (const affectedItem of webhook.data.items) {
     // we are looking for the ultimate "parent"/indexed item that contains the content that has been updated
-
+    console.log(affectedItem)
     // found an item in algolia
     const foundItems: SearchableItem[] = await algoliaClient.searchIndex(affectedItem.type, affectedItem.language);
 
