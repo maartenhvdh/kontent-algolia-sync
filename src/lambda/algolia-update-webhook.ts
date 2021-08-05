@@ -44,7 +44,6 @@ async function processNotIndexedContent(codename: string, language: string, conf
     const searchableStructure = kontentClient.createSearchableStructure([itemFromDelivery], content);
     return searchableStructure;
   }
-
   return [];
 }
 
@@ -97,6 +96,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   const algoliaClient = new AlgoliaClient(config.algolia);
   const itemsToIndex: SearchableItem[] = [];
+  let item = null;
 
   // go through updated items
   for (const affectedItem of webhook.data.items) {
@@ -112,16 +112,17 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
     // we actually found some items in algolia => update or delete?
     for (const foundItem of foundItems) {
-      itemsToIndex.push(...await processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient));
+      item = processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient)
+      itemsToIndex.push(...await item);
     }
   }
 
   const uniqueItems = Array.from(new Set(itemsToIndex.map(item => item.codename))).map(codename => { return itemsToIndex.find(item => item.codename === codename) });
   const indexedItems: string[] = await algoliaClient.indexSearchableStructure(uniqueItems);
-  
+
   return {
     statusCode: 200,
-    body: `${JSON.stringify(indexedItems)}`,
+    body: `${JSON.stringify(item)}`,
   };
 }
 
