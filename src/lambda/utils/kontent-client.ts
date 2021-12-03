@@ -73,7 +73,7 @@ class KontentClient {
       answer: item.answer.value,
       lastmodified: item.system.lastModified,
       type: item.type.value,
-      client: item.client.value,        
+      categories: item.categories.value,        
       parents: parents,
       contents: ""
     };
@@ -127,7 +127,7 @@ class KontentClient {
         answer: item.answer.value,
         lastmodified: item.system.lastModified,
         type: item.type.value,
-        client: item.client.value,        
+        categories: item.categories.value,        
         language: item.system.language,
         contenttype: item.system.type,
         collection: item.system.collection,
