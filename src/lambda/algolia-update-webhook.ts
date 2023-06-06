@@ -47,8 +47,11 @@ async function processNotIndexedContent(codename: string, language: string, conf
   if (itemFromDelivery && itemFromDelivery[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
     const searchableStructure = kontentClient.createSearchableStructure([itemFromDelivery], content);
+    console.log("searchableStructure")
+    console.log(searchableStructure)
     return searchableStructure;
   }
+  console.log("empty return")
   return [];
 }
 
@@ -127,8 +130,11 @@ export async function handler(event: APIGatewayEvent, context: Context) {
       console.log(processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient))
     }
   }
-
+console.log("itemsToIndex")
+console.log(itemsToIndex)
   const uniqueItems = Array.from(new Set(itemsToIndex.map(item => item.codename))).map(codename => { return itemsToIndex.find(item => item.codename === codename) });
+  console.log("uniqueItems")
+  console.log(uniqueItems)
   const indexedItems: string[] = await algoliaClient.indexSearchableStructure(uniqueItems);
  console.log("end")
   return {
