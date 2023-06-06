@@ -44,7 +44,7 @@ async function processNotIndexedContent(codename: string, language: string, conf
   console.log("itemFromDelivery")
   console.log(itemFromDelivery)
   // the item has slug => new record
-  if (itemFromDelivery && itemFromDelivery[config.kontent.slugCodename]) {
+  if (itemFromDelivery && itemFromDelivery.elements[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
     const searchableStructure = kontentClient.createSearchableStructure([itemFromDelivery], content);
     console.log("searchableStructure")
