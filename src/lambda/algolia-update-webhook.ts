@@ -34,24 +34,13 @@ async function processNotIndexedContent(codename: string, language: string, conf
   kontentConfig.language = language;
   const kontentClient = new KontentClient(kontentConfig);
 
-  console.log("codename")
-  console.log(codename)
   // get all content for requested codename
   const content: IContentItem[] = await kontentClient.getAllContentForCodename(codename);
-  console.log("content")
-  console.log(content)
   const itemFromDelivery = content.find(item => item.system.codename == codename);
-  console.log("itemFromDelivery")
-  console.log(itemFromDelivery)
-  console.log("slugCodename")
-  console.log(config.kontent.slugCodename)
-  console.log(itemFromDelivery.elements[config.kontent.slugCodename])
   // the item has slug => new record
   if (itemFromDelivery && itemFromDelivery.elements[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
     const searchableStructure = kontentClient.createSearchableStructure([itemFromDelivery], content);
-    console.log("searchableStructure")
-    console.log(searchableStructure)
     return searchableStructure;
   }
   console.log("empty return")
@@ -121,13 +110,11 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
     // item not found in algolia  => new content to be indexed?
     if (foundItems.length == 0) {
-      console.log("item not found")
       itemsToIndex.push(...await processNotIndexedContent(affectedItem.codename, affectedItem.language, config));
     }
 
     // we actually found some items in algolia => update or delete?
     for (const foundItem of foundItems) {
-      console.log("item found")
       itemsToIndex.push(...await processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient));
       console.log(foundItem.codename)
       console.log(processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient))
@@ -136,8 +123,6 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 console.log("itemsToIndex")
 console.log(itemsToIndex)
   const uniqueItems = Array.from(new Set(itemsToIndex.map(item => item.codename))).map(codename => { return itemsToIndex.find(item => item.codename === codename) });
-  console.log("uniqueItems")
-  console.log(uniqueItems)
   const indexedItems: string[] = await algoliaClient.indexSearchableStructure(uniqueItems);
  console.log("end")
   return {
