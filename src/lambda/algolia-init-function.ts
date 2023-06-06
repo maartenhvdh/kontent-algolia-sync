@@ -44,7 +44,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
   }
 
   if (!event.body)
-    return { statusCode: 200, body: [] };
+    return { statusCode: 200, body: "Body is empty" };
 
   // parse config from the body & env. variables
   const config = getConfiguration(event.body);
