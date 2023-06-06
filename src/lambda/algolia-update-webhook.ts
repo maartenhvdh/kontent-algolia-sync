@@ -5,7 +5,7 @@ import { IWebhookDeliveryResponse, IWebhookDeliveryItem, SignatureHelper } from 
 import { SearchableItem, SearchProjectConfiguration } from "./utils/search-model"
 import AlgoliaClient from "./utils/algolia-client";
 import KontentClient from './utils/kontent-client';
-import { ContentItem } from '@kentico/kontent-delivery';
+import {  IContentItem } from '@kontent-ai/delivery-sdk';
 
 // @ts-ignore - netlify env. variable
 const { ALGOLIA_API_KEY, KONTENT_SECRET } = process.env;
@@ -35,9 +35,9 @@ async function processNotIndexedContent(codename: string, language: string, conf
   const kontentClient = new KontentClient(kontentConfig);
 
   // get all content for requested codename
-  const content: ContentItem[] = await kontentClient.getAllContentForCodename(codename);
+  const content: IContentItem[] = await kontentClient.getAllContentForCodename(codename);
   const itemFromDelivery = content.find(item => item.system.codename == codename);
-
+ console.log(content)
   // the item has slug => new record
   if (itemFromDelivery && itemFromDelivery[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
@@ -54,7 +54,7 @@ async function processIndexedContent(codename: string, language: string, config:
   const kontentClient = new KontentClient(kontentConfig);
 
   // get all content for requested codename
-  const content: ContentItem[] = await kontentClient.getAllContentForCodename(codename);
+  const content: IContentItem[] = await kontentClient.getAllContentForCodename(codename);
   const itemFromDelivery = content.find(item => item.system.codename == codename);
 
   console.log("test maarten");
@@ -110,11 +110,13 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
     // item not found in algolia  => new content to be indexed?
     if (foundItems.length == 0) {
+      console.log("item not found")
       itemsToIndex.push(...await processNotIndexedContent(affectedItem.codename, affectedItem.language, config));
     }
 
     // we actually found some items in algolia => update or delete?
     for (const foundItem of foundItems) {
+      console.log("item found")
       itemsToIndex.push(...await processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient));
       console.log(foundItem.codename)
       console.log(processIndexedContent(foundItem.codename, foundItem.language, config, algoliaClient))

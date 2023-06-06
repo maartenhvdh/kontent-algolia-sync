@@ -68,6 +68,6 @@ export async function handler(event: APIGatewayEvent, context: Context) {
 
   return {
     statusCode: 200,
-    body: `test ${JSON.stringify(indexedItems)} and content: ${JSON.stringify(content)} and contentWithSlug: ${JSON.stringify(contentWithSlug)}`,
+    body: `${JSON.stringify(indexedItems)}`,
   };
 };
