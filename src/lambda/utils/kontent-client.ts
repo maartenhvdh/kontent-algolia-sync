@@ -1,4 +1,4 @@
-import { ContentItem, GenericElement, DeliveryClient, ItemMapper } from '@kentico/kontent-delivery'
+import {  IContentItem, DeliveryClient } from '@kontent-ai/delivery-sdk';
 import { KontentConfiguration, SearchableItem, ContentBlock } from "./search-model";
 
 class KontentClient {
@@ -7,46 +7,46 @@ class KontentClient {
 
   constructor(config: KontentConfiguration) {
     this.config = config;
-    this.deliveryClient = new DeliveryClient({ projectId: this.config.projectId });
+    this.deliveryClient = new DeliveryClient({ environmentId: this.config.projectId });
   }
 
   // PRIVATE: processes linked content + components
-  _getLinkedContent(codenames: string[], parents: string[], children: string[], allContent: ContentItem[]) {
-    const linkedContent: ContentBlock[] = [];
+  _getLinkedContent(codenames: string[], parents: string[], children: string[], allContent: IContentItem[]) {
+        const linkedContent: ContentBlock[] = [];
 
-    for (const linkedCodename of codenames) {
-      const foundLinkedItem: ContentItem | undefined = allContent.find(i => i.system.codename == linkedCodename);
-      // IF THE LINKED ITEM CONTAINS SLUG, IT'S NOT BEING INCLUDED IN THE PARENT'S CONTENT
+        for (const linkedCodename of codenames) {
+            const foundLinkedItem: IContentItem | undefined = allContent.find(i => i.system.codename == linkedCodename);
+            // IF THE LINKED ITEM CONTAINS SLUG, IT'S NOT BEING INCLUDED IN THE PARENT'S CONTENT
 
-      if (foundLinkedItem) {
-        children.push(foundLinkedItem.system.codename);
-        if (!foundLinkedItem[this.config.slugCodename]) {// if the item doesn't have a slug -> include
-          linkedContent.push(...this.getContentFromItem(foundLinkedItem, parents, children, allContent));
+            if (foundLinkedItem) {
+                children.push(foundLinkedItem.system.codename);
+                if (!foundLinkedItem[this.config.slugCodename]) {// if the item doesn't have a slug -> include
+                    linkedContent.push(...this.getContentFromItem(foundLinkedItem, parents, children, allContent));
+                }
+            }
         }
-      }
-    }
 
-    return linkedContent;
+        return linkedContent;
   }
 
-  // returns all content, including linked items in one flat array of ContentItems
-  async getAllContentFromProject(): Promise<ContentItem[]> {
+  // returns all content, including linked items in one flat array of IContentItems
+  async getAllContentFromProject(): Promise<IContentItem[]> {
     if (!this.config.language) return [];
-    const feed = await this.deliveryClient.itemsFeedAll().queryConfig({ waitForLoadingNewContent: true })
+    const feed = await this.deliveryClient.items().queryConfig({ waitForLoadingNewContent: true })
       .languageParameter(this.config.language).equalsFilter("system.language", this.config.language).toPromise();
     
     // all content items (including modular content) + components put into one array
-    return [...feed.items, ...Object.keys(feed.linkedItems).map(key => feed.linkedItems[key])];
+    return [...feed.data.items, ...Object.keys(feed.data.linkedItems).map(key => feed.data.linkedItems[key])]
   }
 
-  async getAllContentForCodename(codename: string): Promise<ContentItem[]> {
+  async getAllContentForCodename(codename: string): Promise<IContentItem[]> {
     if (!this.config.language) return [];
     try {
       const content = await this.deliveryClient.item(codename).queryConfig({ waitForLoadingNewContent: true })
         .languageParameter(this.config.language).depthParameter(100).toPromise();
 
       // all content items (including modular content) + components put into one array
-      return [content.item, ...Object.keys(content.linkedItems).map(key => content.linkedItems[key])];
+      return [content.data.item, ...Object.keys(content.data.linkedItems).map(key => content.data.linkedItems[key])];
     }
     catch (error) {
       return [];
@@ -54,7 +54,7 @@ class KontentClient {
   }
 
   // extracts text content from an item + linked items
-  getContentFromItem(item: ContentItem, parents: string[], children: string[], allContent: ContentItem[]): ContentBlock[] {
+  getContentFromItem(item: IContentItem, parents: string[], children: string[], allContent: IContentItem[]): ContentBlock[] {
     if (!item) return [];
 
     // array of linked content for this item
@@ -69,20 +69,21 @@ class KontentClient {
       collection: item.system.collection,
       contenttype: item.system.type,
       name: item.system.name,
-      question: item.question.value,
-      answer: item.answer.value,
-      lastmodified: item.system.lastModified,
-      type: item.type.value,
-      categories: item.categories.value,        
+      question: item.elements.question.value,
+      answer: item.elements.answer.value,
+      lastmodified: new Date(item.system.lastModified),
+      type: item.elements.type.value,
+      categories: item.elements.categories.value,        
       parents: parents,
       contents: ""
     };
 
     // go over each element and extract it's contents
     // ONLY FOR TEXT/RICH-TEXT + LINKED ITEMS (modular content)
-    for (let propName in item._raw.elements) {
-      const property: GenericElement = item[propName];
-      const type: string = property.type;
+    for (let propName in item.elements) {
+      const camelCasePropName = getCamelCaseName(propName)
+      const property: any = item.elements[camelCasePropName];
+      const type: string = property?.type;
       let stringValue: string = "";
 
       switch (type) {
@@ -112,7 +113,7 @@ class KontentClient {
   }
 
   // creates a searchable structure (i.e. how the content should be structured for search) from obtained content
-  createSearchableStructure(contentWithSlug: ContentItem[], allContent: ContentItem[]): SearchableItem[] {
+  createSearchableStructure(contentWithSlug: IContentItem[], allContent: IContentItem[]): SearchableItem[] {
     const searchableStructure: SearchableItem[] = [];
 
     // process all items with slug into searchable items
@@ -123,11 +124,11 @@ class KontentClient {
         id: item.system.id,
         codename: item.system.codename,
         name: item.system.name,
-        question: item.question.value,
-        answer: item.answer.value,
-        lastmodified: item.system.lastModified,
-        type: item.type.value,
-        categories: item.categories.value,        
+        question: item.elements.question.value,
+        answer: item.elements.answer.value,
+        lastmodified: new Date(item.system.lastModified),
+        type: item.elements.type.value,
+        categories: item.elements.categories.value,      
         language: item.system.language,
         contenttype: item.system.type,
         collection: item.system.collection,
@@ -144,3 +145,12 @@ class KontentClient {
 }
 
 export default KontentClient;
+
+function getCamelCaseName(propName: string) {
+  const adjusted = propName
+  .toLowerCase()
+  .replace(/[-_][a-z0-9]/g, (group) => group.slice(-1).toUpperCase())
+  .replace(/_/g, '');
+
+return adjusted.charAt(0).toLowerCase() + adjusted.slice(1)
+}

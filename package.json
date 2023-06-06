@@ -14,8 +14,8 @@
   },
   "homepage": "https://github.com/strizr/kontent-netlify-webhook-processor#readme",
   "dependencies": {
-    "@kentico/kontent-delivery": "^10.3.0",
     "@kentico/kontent-webhook-helper": "^1.1.0",
+    "@kontent-ai/delivery-sdk": "^14.2.0",
     "algoliasearch": "^4.8.6",
     "axios": "^0.21.1",
     "crypto": "^1.0.1",
