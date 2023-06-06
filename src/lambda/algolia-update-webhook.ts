@@ -43,6 +43,9 @@ async function processNotIndexedContent(codename: string, language: string, conf
   const itemFromDelivery = content.find(item => item.system.codename == codename);
   console.log("itemFromDelivery")
   console.log(itemFromDelivery)
+  console.log("slugCodename")
+  console.log(config.kontent.slugCodename)
+  console.log(itemFromDelivery.elements[config.kontent.slugCodename])
   // the item has slug => new record
   if (itemFromDelivery && itemFromDelivery.elements[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
