@@ -54,7 +54,7 @@ export async function handler(event: APIGatewayEvent, context: Context) {
   const content = await kontentClient.getAllContentFromProject();
 
   // all items with a predefined slug property -> SEARCHABLE PAGES (indexed objects)
-  const contentWithSlug = content.filter(item => item[config.kontent.slugCodename]);
+  const contentWithSlug = content.filter(item => item.elements[config.kontent.slugCodename]);
 
   // creates a searchable structure based on the content's structure
   const searchableStructure = kontentClient.createSearchableStructure(contentWithSlug, content);
