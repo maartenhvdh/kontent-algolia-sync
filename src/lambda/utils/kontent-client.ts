@@ -1,4 +1,4 @@
-import {  IContentItem, DeliveryClient } from '@kontent-ai/delivery-sdk';
+import {  IContentItem, DeliveryClient, Elements, camelCasePropertyNameResolver } from '@kontent-ai/delivery-sdk';
 import { KontentConfiguration, SearchableItem, ContentBlock } from "./search-model";
 
 class KontentClient {
@@ -7,7 +7,13 @@ class KontentClient {
 
   constructor(config: KontentConfiguration) {
     this.config = config;
-    this.deliveryClient = new DeliveryClient({ environmentId: this.config.projectId });
+    this.deliveryClient = new DeliveryClient({ environmentId: this.config.projectId,
+      previewApiKey: process.env.NEXT_PUBLIC_KONTENT_PREVIEW_API_KEY,
+      defaultQueryConfig: {
+        usePreviewMode: true,
+        waitForLoadingNewContent: true
+      },
+      propertyNameResolver: camelCasePropertyNameResolver });
   }
 
   // PRIVATE: processes linked content + components
@@ -32,8 +38,12 @@ class KontentClient {
   // returns all content, including linked items in one flat array of IContentItems
   async getAllContentFromProject(): Promise<IContentItem[]> {
     if (!this.config.language) return [];
-    const feed = await this.deliveryClient.items().queryConfig({ waitForLoadingNewContent: true })
-      .languageParameter(this.config.language).equalsFilter("system.language", this.config.language).toPromise();
+    const feed = await this.deliveryClient
+    .items()
+    .queryConfig({ waitForLoadingNewContent: true })
+      .languageParameter(this.config.language)
+      .equalsFilter("system.language", this.config.language)
+      .toPromise();
     
     // all content items (including modular content) + components put into one array
     return [...feed.data.items, ...Object.keys(feed.data.linkedItems).map(key => feed.data.linkedItems[key])]
@@ -118,22 +128,23 @@ class KontentClient {
 
     // process all items with slug into searchable items
     for (const item of contentWithSlug) {
+      const url = item.elements[this.config.slugCodename] as Elements.UrlSlugElement
       // searchable item structure
       let searchableItem: SearchableItem = {
-        objectID: `${item.system.codename}_${item.system.language}`, 
-        id: item.system.id,
-        codename: item.system.codename,
-        name: item.system.name,
-        question: item.elements.question.value,
-        answer: item.elements.answer.value,
-        lastmodified: new Date(item.system.lastModified),
-        type: item.elements.type.value,
-        categories: item.elements.categories.value,      
-        language: item.system.language,
-        contenttype: item.system.type,
-        collection: item.system.collection,
-        slug: item[this.config.slugCodename].value,
-        content: []
+          objectID: `${item.system.codename}_${item.system.language}`, 
+          id: item.system.id,
+          codename: item.system.codename,
+          name: item.system.name,
+          question: item.elements.question.value,
+          answer: item.elements.answer.value,
+          lastmodified: new Date(item.system.lastModified),
+          type: item.elements.type.value,
+          categories: item.elements.categories.value,        
+          language: item.system.language,
+          contenttype: item.system.type,
+          collection: item.system.collection,
+          slug: url.value,
+          content: []
       };
 
       searchableItem.content = this.getContentFromItem(item, [], [], allContent,);

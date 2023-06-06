@@ -48,4 +48,4 @@ type ContentBlock = {
   contents: string
 }
 
-export { SearchProjectConfiguration, SearchableItem, ContentBlock, AlgoliaConfiguration, KontentConfiguration }
+export type { SearchProjectConfiguration, SearchableItem, ContentBlock, AlgoliaConfiguration, KontentConfiguration }
