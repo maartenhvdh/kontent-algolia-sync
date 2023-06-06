@@ -34,10 +34,15 @@ async function processNotIndexedContent(codename: string, language: string, conf
   kontentConfig.language = language;
   const kontentClient = new KontentClient(kontentConfig);
 
+  console.log("codename")
+  console.log(codename)
   // get all content for requested codename
   const content: IContentItem[] = await kontentClient.getAllContentForCodename(codename);
+  console.log("content")
+  console.log(content)
   const itemFromDelivery = content.find(item => item.system.codename == codename);
- console.log(content)
+  console.log("itemFromDelivery")
+  console.log(itemFromDelivery)
   // the item has slug => new record
   if (itemFromDelivery && itemFromDelivery[config.kontent.slugCodename]) {
     // creates a searchable structure based on the content's structure
